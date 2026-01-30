@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Kirinyaga University Library{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-success text-white text-center py-4">
+                <h3><i class="bi bi-shield-lock"></i> Librarian Login</h3>
+                <p class="mb-0">Kirinyaga University Library System</p>
+            </div>
+            <div class="card-body p-5">
+                <form method="POST" action="{{ url_for('login') }}">
+                    <div class="mb-4">
+                        <label for="username" class="form-label">
+                            <i class="bi bi-person-circle"></i> Username
+                        </label>
+                        <input type="text"
+                               class="form-control form-control-lg"
+                               id="username"
+                               name="username"
+                               placeholder="Enter your username"
+                               required
+                               autofocus>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password" class="form-label">
+                            <i class="bi bi-key"></i> Password
+                        </label>
+                        <div class="input-group">
+                            <input type="password"
+                                   class="form-control form-control-lg"
+                                   id="password"
+                                   name="password"
+                                   placeholder="Enter your password"
+                                   required>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mb-4">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="bi bi-box-arrow-in-right"></i> Login
+                        </button>
+                    </div>
+
+                    <div class="text-center">
+                        <p class="text-muted">
+                            <i class="bi bi-info-circle"></i> Default login: admin / admin123
+                        </p>
+                        <a href="{{ url_for('index') }}" class="text-success">
+                            <i class="bi bi-arrow-left"></i> Back to Home
+                        </a>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center py-3">
+                <small class="text-muted">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    For authorized personnel only. Unauthorized access is prohibited.
+                </small>
+            </div>
+        </div>
+
+        <!-- University Info -->
+        <div class="card mt-4 border-success">
+            <div class="card-body text-center">
+                <h5 class="card-title text-success">
+                    <i class="bi bi-building"></i> Kirinyaga University
+                </h5>
+                <p class="card-text">
+                    School of Innovation and Technology<br>
+                    <small class="text-muted">"Innovation and Excellence"</small>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('togglePassword').addEventListener('click', function() {
+    const passwordInput = document.getElementById('password');
+    const icon = this.querySelector('i');
+
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+    }
+});
+</script>
+{% endblock %}

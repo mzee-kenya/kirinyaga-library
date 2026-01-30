@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<library_config>
+    <university>
+        <name>Kirinyaga University</name>
+        <school>School of Innovation and Technology</school>
+        <motto>Innovation and Excellence</motto>
+        <theme_color>#1e7e34</theme_color>
+    </university>
+
+    <library_settings>
+        <max_borrow_days>14</max_borrow_days>
+        <fine_per_day>10</fine_per_day>
+        <max_books_student>5</max_books_student>
+        <max_books_staff>10</max_books_staff>
+        <opening_time>08:00</opening_time>
+        <closing_time>20:00</closing_time>
+    </library_settings>
+
+    <categories>
+        <category>Computer Science</category>
+        <category>Engineering</category>
+        <category>Business</category>
+        <category>Education</category>
+        <category>Science</category>
+        <category>Mathematics</category>
+        <category>Reference</category>
+        <category>Fiction</category>
+        <category>Non-Fiction</category>
+    </categories>
+
+    <departments>
+        <department>Computer Science</department>
+        <department>Information Technology</department>
+        <department>Software Engineering</department>
+        <department>Business Information Technology</department>
+        <department>Electrical Engineering</department>
+        <department>Mechanical Engineering</department>
+        <department>Education</department>
+        <department>Business Management</department>
+    </departments>
+</library_config>

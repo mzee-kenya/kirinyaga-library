@@ -1,0 +1,671 @@
+{% extends "base.html" %}
+
+{% block title %}Add Member - Kirinyaga University Library{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Breadcrumb Navigation -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('members') }}">Members</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Add New Member</li>
+            </ol>
+        </nav>
+
+        <!-- Main Card -->
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-success text-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="bi bi-person-plus"></i> Register New Library Member
+                    </h4>
+                    <span class="badge bg-light text-success">Kirinyaga University</span>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('add_member') }}" id="addMemberForm">
+                    <!-- Member ID & Registration Number -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <label for="member_id" class="form-label">
+                                <i class="bi bi-person-badge text-success"></i> Member ID *
+                            </label>
+                            <input type="text"
+                                   class="form-control form-control-lg"
+                                   id="member_id"
+                                   name="member_id"
+                                   placeholder="e.g., STU2024001"
+                                   required
+                                   pattern="[A-Za-z0-9]+"
+                                   title="Alphanumeric characters only">
+                            <div class="form-text">
+                                <small>Unique identifier (e.g., STU2024001 for students, STAFF001 for staff)</small>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="registration_number" class="form-label">
+                                <i class="bi bi-card-checklist text-success"></i> Registration Number *
+                            </label>
+                            <input type="text"
+                                   class="form-control form-control-lg"
+                                   id="registration_number"
+                                   name="registration_number"
+                                   placeholder="e.g., KU/CS/001/2024"
+                                   required>
+                            <div class="form-text">
+                                <small>Official university registration number</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Personal Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <label for="first_name" class="form-label">
+                                <i class="bi bi-person text-success"></i> First Name *
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="first_name"
+                                   name="first_name"
+                                   placeholder="e.g., John"
+                                   required
+                                   pattern="[A-Za-z\s]+"
+                                   title="Letters and spaces only">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="last_name" class="form-label">
+                                <i class="bi bi-person text-success"></i> Last Name *
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="last_name"
+                                   name="last_name"
+                                   placeholder="e.g., Doe"
+                                   required
+                                   pattern="[A-Za-z\s]+"
+                                   title="Letters and spaces only">
+                        </div>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">
+                                <i class="bi bi-envelope text-success"></i> Email Address *
+                            </label>
+                            <input type="email"
+                                   class="form-control"
+                                   id="email"
+                                   name="email"
+                                   placeholder="e.g., johndoe@kirinyaga.ac.ke"
+                                   required>
+                            <div class="form-text">
+                                <small>University email preferred</small>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label">
+                                <i class="bi bi-telephone text-success"></i> Phone Number
+                            </label>
+                            <input type="tel"
+                                   class="form-control"
+                                   id="phone"
+                                   name="phone"
+                                   placeholder="e.g., 0712 345 678"
+                                   pattern="[0-9\s\+]+"
+                                   title="Numbers, spaces and + only">
+                            <div class="form-text">
+                                <small>Format: 0712 345 678 or +254712345678</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Academic Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <label for="department" class="form-label">
+                                <i class="bi bi-building text-success"></i> Department *
+                            </label>
+                            <select class="form-select" id="department" name="department" required>
+                                <option value="">Select Department</option>
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="Information Technology">Information Technology</option>
+                                <option value="Software Engineering">Software Engineering</option>
+                                <option value="Business Information Technology">Business Information Technology</option>
+                                <option value="Electrical Engineering">Electrical Engineering</option>
+                                <option value="Mechanical Engineering">Mechanical Engineering</option>
+                                <option value="Education">Education</option>
+                                <option value="Business Management">Business Management</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="course" class="form-label">
+                                <i class="bi bi-book text-success"></i> Course/Program
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="course"
+                                   name="course"
+                                   placeholder="e.g., BSc Computer Science">
+                        </div>
+                    </div>
+
+                    <!-- Membership Type -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <label for="membership_type" class="form-label">
+                                <i class="bi bi-people text-success"></i> Membership Type *
+                            </label>
+                            <select class="form-select" id="membership_type" name="membership_type" required>
+                                <option value="student">Student (Max: 5 books)</option>
+                                <option value="staff">Staff (Max: 10 books)</option>
+                                <option value="faculty">Faculty (Max: 10 books)</option>
+                            </select>
+                            <div class="form-text">
+                                <small>Borrowing limits: Students (5), Staff/Faculty (10)</small>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="status" class="form-label">
+                                <i class="bi bi-circle text-success"></i> Status
+                            </label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="active" selected>Active</option>
+                                <option value="suspended">Suspended</option>
+                                <option value="graduated">Graduated</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Additional Notes -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <label for="notes" class="form-label">
+                                <i class="bi bi-chat-left-text text-success"></i> Additional Notes
+                            </label>
+                            <textarea class="form-control"
+                                      id="notes"
+                                      name="notes"
+                                      rows="3"
+                                      placeholder="Any additional information about the member..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end border-top pt-4">
+                        <a href="{{ url_for('members') }}" class="btn btn-outline-secondary btn-lg me-md-2">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="bi bi-person-plus"></i> Register Member
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card-footer bg-light">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="bi bi-info-circle text-success"></i> Registration Guidelines</h6>
+                        <ul class="list-unstyled small">
+                            <li><i class="bi bi-check-circle text-success"></i> All fields marked with * are required</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Member ID must be unique</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Email should be verified if possible</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Update status for graduated/suspended members</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="bi bi-shield-check text-success"></i> Data Privacy</h6>
+                        <p class="small text-muted">
+                            Member information is stored securely and used only for library management purposes.
+                            All data is protected under Kirinyaga University privacy policy.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card border-success">
+                    <div class="card-body text-center">
+                        <i class="bi bi-people text-success" style="font-size: 2rem;"></i>
+                        <h5 class="mt-2">Total Members</h5>
+                        <p class="display-6 fw-bold text-success">0</p>
+                        <small class="text-muted">Registered in system</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-primary">
+                    <div class="card-body text-center">
+                        <i class="bi bi-mortarboard text-primary" style="font-size: 2rem;"></i>
+                        <h5 class="mt-2">Student Members</h5>
+                        <p class="display-6 fw-bold text-primary">0</p>
+                        <small class="text-muted">Currently active</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-warning">
+                    <div class="card-body text-center">
+                        <i class="bi bi-briefcase text-warning" style="font-size: 2rem;"></i>
+                        <h5 class="mt-2">Staff Members</h5>
+                        <p class="display-6 fw-bold text-warning">0</p>
+                        <small class="text-muted">Faculty & Staff</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-lightning text-success"></i> Quick Actions</h5>
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <a href="{{ url_for('members') }}" class="btn btn-outline-success w-100">
+                                    <i class="bi bi-list-ul"></i> View All Members
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{{ url_for('issue_book') }}" class="btn btn-outline-success w-100">
+                                    <i class="bi bi-journal-plus"></i> Issue Book
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{{ url_for('add_book') }}" class="btn btn-outline-success w-100">
+                                    <i class="bi bi-book-plus"></i> Add Book
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-success w-100">
+                                    <i class="bi bi-speedometer2"></i> Dashboard
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-check-circle"></i> Member Registered Successfully
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <i class="bi bi-person-check text-success" style="font-size: 4rem;"></i>
+                <h4 class="mt-3">Registration Complete!</h4>
+                <p class="text-muted">New member has been added to the library system.</p>
+                <div id="memberDetails" class="text-start mt-3"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-printer"></i> Print Receipt
+                </button>
+                <a href="{{ url_for('members') }}" class="btn btn-success">
+                    <i class="bi bi-people"></i> View All Members
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    const form = document.getElementById('addMemberForm');
+    const emailInput = document.getElementById('email');
+    const phoneInput = document.getElementById('phone');
+
+    // Validate email domain
+    emailInput.addEventListener('blur', function() {
+        const email = this.value;
+        if (email && !email.includes('@')) {
+            this.classList.add('is-invalid');
+            this.nextElementSibling.innerHTML = '<small class="text-danger">Invalid email format</small>';
+        } else {
+            this.classList.remove('is-invalid');
+            this.nextElementSibling.innerHTML = '<small>University email preferred</small>';
+        }
+    });
+
+    // Format phone number
+    phoneInput.addEventListener('input', function() {
+        let value = this.value.replace(/\D/g, '');
+        if (value.length > 0) {
+            if (value.length <= 9) {
+                value = value.replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3');
+            } else if (value.length === 12) {
+                value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{3})/, '+$1 $2 $3 $4');
+            }
+        }
+        this.value = value;
+    });
+
+    // Auto-generate member ID based on selection
+    const memberTypeSelect = document.getElementById('membership_type');
+    const memberIdInput = document.getElementById('member_id');
+
+    memberTypeSelect.addEventListener('change', function() {
+        const type = this.value;
+        const prefix = type === 'student' ? 'STU' : type === 'staff' ? 'STAFF' : 'FAC';
+        const timestamp = new Date().getTime().toString().slice(-4);
+        const suggestedId = `${prefix}${new Date().getFullYear()}${timestamp}`;
+
+        if (!memberIdInput.value) {
+            memberIdInput.value = suggestedId;
+            memberIdInput.nextElementSibling.innerHTML =
+                `<small>Suggested ID: ${suggestedId} (You can change it)</small>`;
+        }
+    });
+
+    // Department auto-suggest courses
+    const departmentSelect = document.getElementById('department');
+    const courseInput = document.getElementById('course');
+
+    const courseSuggestions = {
+        'Computer Science': 'BSc Computer Science',
+        'Information Technology': 'BSc Information Technology',
+        'Software Engineering': 'BSc Software Engineering',
+        'Business Information Technology': 'BSc Business Information Technology',
+        'Electrical Engineering': 'BSc Electrical Engineering',
+        'Mechanical Engineering': 'BSc Mechanical Engineering',
+        'Education': 'Bachelor of Education',
+        'Business Management': 'Bachelor of Business Management'
+    };
+
+    departmentSelect.addEventListener('change', function() {
+        const department = this.value;
+        if (courseSuggestions[department] && !courseInput.value) {
+            courseInput.value = courseSuggestions[department];
+        }
+    });
+
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        let valid = true;
+
+        // Check required fields
+        const requiredFields = form.querySelectorAll('[required]');
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                valid = false;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+
+        // Check email format
+        if (emailInput.value && !isValidEmail(emailInput.value)) {
+            emailInput.classList.add('is-invalid');
+            emailInput.nextElementSibling.innerHTML =
+                '<small class="text-danger">Please enter a valid email address</small>';
+            valid = false;
+        }
+
+        if (!valid) {
+            e.preventDefault();
+            showAlert('Please fill in all required fields correctly.', 'danger');
+        } else {
+            // Optional: Show success modal
+            // e.preventDefault();
+            // showSuccessModal();
+        }
+    });
+
+    // Helper functions
+    function isValidEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+
+    function showAlert(message, type) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+        const container = document.querySelector('.container.py-4');
+        container.insertBefore(alertDiv, container.firstChild);
+
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 5000);
+    }
+
+    function showSuccessModal() {
+        const formData = new FormData(form);
+        let detailsHtml = '<ul class="list-group list-group-flush">';
+
+        for (let [key, value] of formData.entries()) {
+            if (value && key !== 'notes') {
+                const label = form.querySelector(`[name="${key}"]`).previousElementSibling?.textContent || key;
+                detailsHtml += `
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span class="fw-bold">${label.replace('*', '').trim()}:</span>
+                        <span>${value}</span>
+                    </li>
+                `;
+            }
+        }
+        detailsHtml += '</ul>';
+
+        document.getElementById('memberDetails').innerHTML = detailsHtml;
+
+        const modal = new bootstrap.Modal(document.getElementById('successModal'));
+        modal.show();
+    }
+
+    // Auto-focus first input
+    if (document.getElementById('member_id')) {
+        document.getElementById('member_id').focus();
+    }
+
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+
+<style>
+/* Custom styles for add member form */
+.form-control-lg {
+    font-size: 1.1rem;
+    padding: 0.75rem 1rem;
+}
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.card {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.card-header {
+    border-bottom: none;
+}
+
+.breadcrumb {
+    background-color: transparent;
+    padding-left: 0;
+}
+
+.breadcrumb-item a {
+    text-decoration: none;
+    color: #1e7e34;
+}
+
+.breadcrumb-item.active {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+}
+
+/* Form validation styles */
+.form-control.is-invalid {
+    border-color: #dc3545;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.form-control.is-valid {
+    border-color: #198754;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .form-control-lg {
+        font-size: 1rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .btn-lg {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+    }
+
+    .card-body {
+        padding: 1rem !important;
+    }
+}
+
+/* Animation for form */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Hover effects */
+.form-control:focus {
+    border-color: #1e7e34;
+    box-shadow: 0 0 0 0.25rem rgba(30, 126, 52, 0.25);
+}
+
+.btn-outline-success:hover {
+    background-color: #1e7e34;
+    border-color: #1e7e34;
+}
+
+/* Custom checkbox and radio styles */
+.form-check-input:checked {
+    background-color: #1e7e34;
+    border-color: #1e7e34;
+}
+
+/* Table styles for member list preview */
+.table th {
+    border-top: none;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* Status badges */
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-active {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-suspended {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.status-graduated {
+    background-color: #e2e3e5;
+    color: #383d41;
+}
+
+/* Member type badges */
+.badge-student {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.badge-staff {
+    background-color: #fd7e14;
+    color: white;
+}
+
+.badge-faculty {
+    background-color: #6f42c1;
+    color: white;
+}
+
+/* Loading spinner */
+.spinner-border.text-success {
+    color: #1e7e34 !important;
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .card {
+        border: 1px solid #dee2e6 !important;
+        box-shadow: none !important;
+    }
+
+    .btn {
+        display: none !important;
+    }
+}
+</style>
+{% endblock %}

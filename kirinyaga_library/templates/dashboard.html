@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Kirinyaga University Library{% endblock %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="text-success">
+            <i class="bi bi-speedometer2"></i> Library Dashboard
+        </h2>
+        <p class="text-muted">Welcome to Kirinyaga University Library Management System</p>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="dashboard-card">
+            <div class="card-body text-center">
+                <div class="card-icon">
+                    <i class="bi bi-book"></i>
+                </div>
+                <h3 class="stat-number">{{ total_books }}</h3>
+                <p class="stat-label">Total Books</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="dashboard-card">
+            <div class="card-body text-center">
+                <div class="card-icon">
+                    <i class="bi bi-people"></i>
+                </div>
+                <h3 class="stat-number">{{ total_members }}</h3>
+                <p class="stat-label">Total Members</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="dashboard-card">
+            <div class="card-body text-center">
+                <div class="card-icon">
+                    <i class="bi bi-journal-arrow-up"></i>
+                </div>
+                <h3 class="stat-number">{{ issued_books }}</h3>
+                <p class="stat-label">Books Issued</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="dashboard-card">
+            <div class="card-body text-center">
+                <div class="card-icon">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <h3 class="stat-number">{{ overdue_books }}</h3>
+                <p class="stat-label">Overdue Books</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card dashboard-card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-lightning"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <a href="{{ url_for('issue_book') }}" class="btn btn-success w-100">
+                            <i class="bi bi-journal-plus"></i> Issue Book
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{{ url_for('return_book') }}" class="btn btn-outline-success w-100">
+                            <i class="bi bi-journal-check"></i> Return Book
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{{ url_for('add_book') }}" class="btn btn-outline-success w-100">
+                            <i class="bi bi-book-plus"></i> Add Book
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{{ url_for('add_member') }}" class="btn btn-outline-success w-100">
+                            <i class="bi bi-person-plus"></i> Add Member
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Transactions -->
+    <div class="col-md-8">
+        <div class="card dashboard-card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent Transactions</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Transaction ID</th>
+                                <th>Book</th>
+                                <th>Member</th>
+                                <th>Issue Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in recent_transactions %}
+                            <tr>
+                                <td>{{ transaction.transaction_id }}</td>
+                                <td>{{ transaction.book.title }}</td>
+                                <td>{{ transaction.member.first_name }} {{ transaction.member.last_name }}</td>
+                                <td>{{ transaction.issue_date.strftime('%Y-%m-%d') }}</td>
+                                <td>
+                                    <span class="status-badge status-{{ transaction.status }}">
+                                        {{ transaction.status|title }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <a href="{{ url_for('transactions') }}" class="btn btn-sm btn-outline-success">
+                    View All Transactions <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popular Books -->
+    <div class="col-md-4">
+        <div class="card dashboard-card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-star"></i> Popular Books</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for book, count in popular_books %}
+                    <div class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ book.title }}</h6>
+                            <span class="badge bg-success">{{ count }}</span>
+                        </div>
+                        <p class="mb-1 small text-muted">By {{ book.author }}</p>
+                        <small>Available: {{ book.available_copies }}/{{ book.total_copies }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Status -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card dashboard-card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> System Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Library Information</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-building text-success"></i> Kirinyaga University Library</li>
+                            <li><i class="bi bi-geo-alt text-success"></i> School of Innovation and Technology</li>
+                            <li><i class="bi bi-calendar-check text-success"></i> Open: Mon-Fri 8:00 AM - 8:00 PM</li>
+                            <li><i class="bi bi-currency-exchange text-success"></i> Fine: KES 10 per day overdue</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Quick Statistics</h6>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-success" style="width: {{ (issued_books/total_books*100 if total_books > 0 else 0)|round(1) }}%">
+                                {{ (issued_books/total_books*100 if total_books > 0 else 0)|round(1) }}% Books Issued
+                            </div>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-warning" style="width: {{ (overdue_books/issued_books*100 if issued_books > 0 else 0)|round(1) }}%">
+                                {{ (overdue_books/issued_books*100 if issued_books > 0 else 0)|round(1) }}% Overdue Rate
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

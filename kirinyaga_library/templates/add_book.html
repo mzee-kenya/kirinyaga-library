@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Add Book - Kirinyaga University Library{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('books') }}">Books</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Add New Book</li>
+            </ol>
+        </nav>
+
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="bi bi-book-plus"></i> Add New Book to Library</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('add_book') }}">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="book_id" class="form-label">Book ID *</label>
+                            <input type="text" class="form-control" id="book_id" name="book_id"
+                                   placeholder="e.g., CS001" required>
+                            <small class="form-text text-muted">Unique identifier for the book</small>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="isbn" class="form-label">ISBN *</label>
+                            <input type="text" class="form-control" id="isbn" name="isbn"
+                                   placeholder="e.g., 978-0-123456-47-2" required>
+                            <small class="form-text text-muted">13-digit International Standard Book Number</small>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label for="title" class="form-label">Book Title *</label>
+                            <input type="text" class="form-control" id="title" name="title"
+                                   placeholder="e.g., Introduction to Computer Science" required>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="edition" class="form-label">Edition</label>
+                            <input type="text" class="form-control" id="edition" name="edition"
+                                   placeholder="e.g., 3rd Edition">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="author" class="form-label">Author(s) *</label>
+                            <input type="text" class="form-control" id="author" name="author"
+                                   placeholder="e.g., John Doe" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="publisher" class="form-label">Publisher</label>
+                            <input type="text" class="form-control" id="publisher" name="publisher"
+                                   placeholder="e.g., Pearson Education">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="publication_year" class="form-label">Publication Year</label>
+                            <input type="number" class="form-control" id="publication_year" name="publication_year"
+                                   min="1900" max="2024" placeholder="e.g., 2023">
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="category" class="form-label">Category *</label>
+                            <select class="form-select" id="category" name="category" required>
+                                <option value="">Select Category</option>
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="Engineering">Engineering</option>
+                                <option value="Mathematics">Mathematics</option>
+                                <option value="Science">Science</option>
+                                <option value="Business">Business</option>
+                                <option value="Education">Education</option>
+                                <option value="Reference">Reference</option>
+                                <option value="Fiction">Fiction</option>
+                                <option value="Non-Fiction">Non-Fiction</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="total_copies" class="form-label">Total Copies *</label>
+                            <input type="number" class="form-control" id="total_copies" name="total_copies"
+                                   min="1" value="1" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="shelf_location" class="form-label">Shelf Location</label>
+                            <input type="text" class="form-control" id="shelf_location" name="shelf_location"
+                                   placeholder="e.g., A12-B3">
+                            <small class="form-text text-muted">Physical location in library</small>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('books') }}" class="btn btn-secondary me-md-2">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-save"></i> Add Book to Library
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

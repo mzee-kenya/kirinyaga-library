@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Kirinyaga University Library System{% endblock %}
+
+{% block content %}
+<div class="row align-items-center min-vh-50">
+    <div class="col-md-6">
+        <div class="text-center text-md-start">
+            <h1 class="display-4 fw-bold text-success mb-3">
+                Welcome to Kirinyaga University Library
+            </h1>
+            <p class="lead mb-4">
+                <strong>School of Innovation and Technology</strong><br>
+                A modern digital library management system designed for efficiency and excellence in academic resource management.
+            </p>
+            <div class="mb-4">
+                <span class="badge bg-success fs-6 mb-2">Innovation</span>
+                <span class="badge bg-primary fs-6 mb-2">Excellence</span>
+                <span class="badge bg-warning text-dark fs-6 mb-2">Technology</span>
+                <span class="badge bg-info fs-6 mb-2">Knowledge</span>
+            </div>
+
+            {% if not session.username %}
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                <a href="{{ url_for('login') }}" class="btn btn-success btn-lg px-4 me-md-2">
+                    <i class="bi bi-box-arrow-in-right"></i> Librarian Login
+                </a>
+                <a href="#features" class="btn btn-outline-success btn-lg px-4">
+                    <i class="bi bi-info-circle"></i> Learn More
+                </a>
+            </div>
+            {% else %}
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-success btn-lg px-4 me-md-2">
+                    <i class="bi bi-speedometer2"></i> Go to Dashboard
+                </a>
+                <a href="{{ url_for('books') }}" class="btn btn-outline-success btn-lg px-4">
+                    <i class="bi bi-book"></i> Browse Books
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="text-center">
+            <img src="{{ url_for('static', filename='imgs/library-hero.png') }}"
+                 alt="Kirinyaga University Library"
+                 class="img-fluid rounded shadow"
+                 onerror="this.src='https://images.unsplash.com/photo-1589998059171-988d887df646?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'">
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div id="features" class="row mt-5 pt-5">
+    <div class="col-12 text-center mb-5">
+        <h2 class="text-success">Library System Features</h2>
+        <p class="lead">Everything you need for modern library management</p>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-book text-success" style="font-size: 3rem;"></i>
+                </div>
+                <h4 class="card-title">Book Management</h4>
+                <p class="card-text">Add, edit, search and manage books with ISBN tracking and categorization.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-people text-success" style="font-size: 3rem;"></i>
+                </div>
+                <h4 class="card-title">Member Management</h4>
+                <p class="card-text">Manage students, staff and faculty members with unique registration numbers.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-journal-check text-success" style="font-size: 3rem;"></i>
+                </div>
+                <h4 class="card-title">Transaction Tracking</h4>
+                <p class="card-text">Track book issues, returns, renewals and calculate fines automatically.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-bar-chart text-success" style="font-size: 3rem;"></i>
+                </div>
+                <h4 class="card-title">Reports & Analytics</h4>
+                <p class="card-text">Generate detailed reports on library usage, popular books and member activity.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Section -->
+<div class="row mt-5 bg-light py-5 rounded">
+    <div class="col-12 text-center mb-4">
+        <h3 class="text-success">Library Statistics</h3>
+    </div>
+
+    <div class="col-md-4 text-center mb-3">
+        <div class="display-6 fw-bold text-success">10,000+</div>
+        <p class="text-muted">Books in Collection</p>
+    </div>
+
+    <div class="col-md-4 text-center mb-3">
+        <div class="display-6 fw-bold text-success">5,000+</div>
+        <p class="text-muted">Active Members</p>
+    </div>
+
+    <div class="col-md-4 text-center mb-3">
+        <div class="display-6 fw-bold text-success">500+</div>
+        <p class="text-muted">Daily Transactions</p>
+    </div>
+</div>
+
+<!-- Quick Access -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-link"></i> Quick Access Links</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <a href="{{ url_for('books') }}" class="btn btn-outline-success w-100">
+                            <i class="bi bi-search"></i> Search Books Catalog
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <a href="#features" class="btn btn-outline-success w-100">
+                            <i class="bi bi-question-circle"></i> System Features
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <a href="#contact" class="btn btn-outline-success w-100">
+                            <i class="bi bi-telephone"></i> Contact Library
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contact Section -->
+<div id="contact" class="row mt-5">
+    <div class="col-12">
+        <h3 class="text-success mb-4">Contact Library Staff</h3>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-geo-alt text-success"></i> Location</h5>
+                        <p class="card-text">
+                            Kirinyaga University Library<br>
+                            School of Innovation and Technology<br>
+                            Main Campus, Kerugoya<br>
+                            P.O. Box 143-10300, Kenya
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-clock text-success"></i> Working Hours</h5>
+                        <p class="card-text">
+                            Monday - Friday: 8:00 AM - 8:00 PM<br>
+                            Saturday: 9:00 AM - 5:00 PM<br>
+                            Sunday: 10:00 AM - 4:00 PM<br>
+                            <small class="text-muted">Closed on public holidays</small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

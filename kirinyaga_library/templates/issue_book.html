@@ -1,0 +1,1048 @@
+{% extends "base.html" %}
+
+{% block title %}Issue Book - Kirinyaga University Library{% endblock %}
+
+{% block extra_css %}
+<style>
+    .search-results {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        margin-top: 5px;
+        display: none;
+    }
+
+    .search-item {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .search-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .search-item:last-child {
+        border-bottom: none;
+    }
+
+    .book-details-card, .member-details-card {
+        display: none;
+    }
+
+    .availability-badge {
+        font-size: 0.9rem;
+        padding: 5px 10px;
+    }
+
+    .fine-warning {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        border-left: 4px solid #ffc107;
+    }
+
+    .borrowing-rules {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        border-left: 4px solid #28a745;
+    }
+
+    .transaction-summary {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border-left: 4px solid #2196f3;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Breadcrumb Navigation -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('books') }}">Books</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Issue Book</li>
+            </ol>
+        </nav>
+
+        <!-- Main Card -->
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-success text-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="bi bi-journal-plus"></i> Issue Book to Member
+                    </h4>
+                    <span class="badge bg-light text-success">Kirinyaga University</span>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('issue_book') }}" id="issueBookForm">
+                    <!-- Search Section -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-search text-success"></i> Search Book
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="input-group">
+                                        <input type="text"
+                                               class="form-control"
+                                               id="bookSearch"
+                                               placeholder="Search by Book ID, Title, ISBN or Author..."
+                                               autocomplete="off">
+                                        <button class="btn btn-outline-success" type="button" id="scanBookBtn">
+                                            <i class="bi bi-upc-scan"></i> Scan
+                                        </button>
+                                    </div>
+                                    <div id="bookSearchResults" class="search-results"></div>
+
+                                    <div id="selectedBook" class="book-details-card mt-3 p-3 border rounded">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="mb-1" id="bookTitle">Book Title</h6>
+                                                <p class="mb-1 text-muted" id="bookAuthor">Author</p>
+                                                <div class="d-flex gap-2 mt-2">
+                                                    <span class="badge bg-info" id="bookCategory">Category</span>
+                                                    <span class="badge bg-secondary" id="bookISBN">ISBN</span>
+                                                </div>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge availability-badge bg-success" id="bookAvailability">
+                                                    Available: 0/0
+                                                </span>
+                                                <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="clearBookSelection()">
+                                                    <i class="bi bi-x"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <input type="hidden" id="book_id" name="book_id" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-person-search text-success"></i> Search Member
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="input-group">
+                                        <input type="text"
+                                               class="form-control"
+                                               id="memberSearch"
+                                               placeholder="Search by Member ID, Name or Registration No..."
+                                               autocomplete="off">
+                                        <button class="btn btn-outline-success" type="button" id="scanMemberBtn">
+                                            <i class="bi bi-upc-scan"></i> Scan
+                                        </button>
+                                    </div>
+                                    <div id="memberSearchResults" class="search-results"></div>
+
+                                    <div id="selectedMember" class="member-details-card mt-3 p-3 border rounded">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="mb-1" id="memberName">Member Name</h6>
+                                                <p class="mb-1 text-muted" id="memberRegNo">Registration No</p>
+                                                <div class="d-flex gap-2 mt-2">
+                                                    <span class="badge bg-primary" id="memberType">Type</span>
+                                                    <span class="badge bg-success" id="memberStatus">Status</span>
+                                                </div>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge bg-info" id="memberBorrowed">Borrowed: 0/5</span>
+                                                <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="clearMemberSelection()">
+                                                    <i class="bi bi-x"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <input type="hidden" id="member_id" name="member_id" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transaction Details -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card transaction-summary">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="bi bi-receipt text-primary"></i> Transaction Details
+                                    </h5>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="mb-3">
+                                                <label class="form-label">Issue Date</label>
+                                                <input type="date"
+                                                       class="form-control"
+                                                       id="issue_date"
+                                                       name="issue_date"
+                                                       value="{{ now().strftime('%Y-%m-%d') if now else '' }}"
+                                                       required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="mb-3">
+                                                <label class="form-label">Due Date</label>
+                                                <input type="date"
+                                                       class="form-control"
+                                                       id="due_date"
+                                                       name="due_date"
+                                                       required>
+                                                <div class="form-text">
+                                                    <small>Default: 14 days from issue</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="mb-3">
+                                                <label class="form-label">Transaction ID</label>
+                                                <input type="text"
+                                                       class="form-control"
+                                                       id="transaction_id"
+                                                       name="transaction_id"
+                                                       value="TRX{{ now().strftime('%Y%m%d%H%M%S') if now else '' }}"
+                                                       readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Warnings and Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card fine-warning">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="bi bi-exclamation-triangle text-warning"></i> Fine Policy
+                                    </h5>
+                                    <ul class="mb-0">
+                                        <li>Borrowing period: <strong>14 days</strong></li>
+                                        <li>Fine rate: <strong>KES 10 per day</strong> for overdue books</li>
+                                        <li>Maximum fine: <strong>KES 1000</strong> per book</li>
+                                        <li>Members with overdue books cannot borrow new books</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card borrowing-rules">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="bi bi-shield-check text-success"></i> Borrowing Rules
+                                    </h5>
+                                    <ul class="mb-0">
+                                        <li>Students: <strong>5 books</strong> maximum</li>
+                                        <li>Staff/Faculty: <strong>10 books</strong> maximum</li>
+                                        <li>Renewal: <strong>Once</strong> for 7 days</li>
+                                        <li>Reservations: <strong>3 days</strong> hold period</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end border-top pt-4">
+                        <a href="{{ url_for('books') }}" class="btn btn-outline-secondary btn-lg me-md-2">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success btn-lg" id="issueBtn" disabled>
+                            <i class="bi bi-journal-check"></i> Issue Book
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card-footer bg-light">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h6><i class="bi bi-info-circle text-success"></i> Issuing Guidelines</h6>
+                        <ul class="list-unstyled small">
+                            <li><i class="bi bi-check-circle text-success"></i> Verify both book and member details</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Check member's borrowing limit</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Ensure book is available</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Record transaction ID for reference</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Inform member about due date and fine policy</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('return_book') }}" class="btn btn-outline-primary">
+                                <i class="bi bi-journal-arrow-down"></i> Return Book
+                            </a>
+                            <a href="{{ url_for('transactions') }}" class="btn btn-outline-info">
+                                <i class="bi bi-clock-history"></i> View Transactions
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row mt-4">
+            <div class="col-md-3">
+                <div class="card border-success">
+                    <div class="card-body text-center">
+                        <i class="bi bi-journal-plus text-success" style="font-size: 2rem;"></i>
+                        <h5 class="mt-2">Today's Issues</h5>
+                        <p class="display-6 fw-bold text-success">0</p>
+                        <small class="text-muted">Books issued today</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-warning">
+                    <div class="card-body text-center">
+                        <i class="bi bi-exclamation-triangle text-warning" style="font-size: 2rem;"></i>
+                        <h5 class="mt-2">Overdue</h5>
+                        <p class="display-6 fw-bold text-warning">0</p>
+                        <small class="text-muted">Books overdue</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-primary">
+                    <div class="card-body text-center">
+                        <i class="bi bi-people text-primary" style="font-size: 2rem;"></i>
+                        <h5 class="mt-2">Active Members</h5>
+                        <p class="display-6 fw-bold text-primary">0</p>
+                        <small class="text-muted">Currently borrowing</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-info">
+                    <div class="card-body text-center">
+                        <i class="bi bi-book text-info" style="font-size: 2rem;"></i>
+                        <h5 class="mt-2">Available Books</h5>
+                        <p class="display-6 fw-bold text-info">0</p>
+                        <small class="text-muted">Ready to borrow</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Issues -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="bi bi-clock-history text-success"></i> Recent Book Issues
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Transaction ID</th>
+                                        <th>Book</th>
+                                        <th>Member</th>
+                                        <th>Issue Date</th>
+                                        <th>Due Date</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentTransactions">
+                                    <tr>
+                                        <td colspan="6" class="text-center py-4">
+                                            <i class="bi bi-journal text-muted" style="font-size: 2rem;"></i>
+                                            <p class="text-muted mt-2">No recent transactions</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-check-circle"></i> Book Issued Successfully
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <i class="bi bi-journal-check text-success" style="font-size: 4rem;"></i>
+                    <h3 class="mt-3">Transaction Complete!</h3>
+                    <p class="text-muted">Book has been issued to member successfully.</p>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">Book Details</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-1"><strong>Title:</strong> <span id="modalBookTitle"></span></p>
+                                <p class="mb-1"><strong>Author:</strong> <span id="modalBookAuthor"></span></p>
+                                <p class="mb-1"><strong>ISBN:</strong> <span id="modalBookISBN"></span></p>
+                                <p class="mb-0"><strong>Book ID:</strong> <span id="modalBookID"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">Member Details</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-1"><strong>Name:</strong> <span id="modalMemberName"></span></p>
+                                <p class="mb-1"><strong>Registration No:</strong> <span id="modalMemberRegNo"></span></p>
+                                <p class="mb-1"><strong>Member ID:</strong> <span id="modalMemberID"></span></p>
+                                <p class="mb-0"><strong>Type:</strong> <span id="modalMemberType"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">Transaction Details</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <p class="mb-1"><strong>Transaction ID:</strong></p>
+                                <h4 class="text-success" id="modalTransactionID"></h4>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="mb-1"><strong>Issue Date:</strong></p>
+                                <h5 id="modalIssueDate"></h5>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="mb-1"><strong>Due Date:</strong></p>
+                                <h5 class="text-danger" id="modalDueDate"></h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning mt-3">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>Reminder:</strong> Please inform the member to return the book by the due date to avoid fines.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="printReceipt()">
+                    <i class="bi bi-printer"></i> Print Receipt
+                </button>
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+                    <i class="bi bi-check-circle"></i> Done
+                </button>
+                <a href="{{ url_for('issue_book') }}" class="btn btn-outline-success">
+                    <i class="bi bi-plus-circle"></i> Issue Another
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set default dates
+    const today = new Date().toISOString().split('T')[0];
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 14);
+    const dueDateStr = dueDate.toISOString().split('T')[0];
+
+    document.getElementById('issue_date').value = today;
+    document.getElementById('due_date').value = dueDateStr;
+    document.getElementById('due_date').min = today;
+
+    // Generate transaction ID
+    function generateTransactionId() {
+        const timestamp = new Date().getTime();
+        const random = Math.floor(Math.random() * 1000);
+        return `TRX${timestamp}${random}`;
+    }
+
+    document.getElementById('transaction_id').value = generateTransactionId();
+
+    // Book search functionality
+    const bookSearch = document.getElementById('bookSearch');
+    const bookResults = document.getElementById('bookSearchResults');
+
+    bookSearch.addEventListener('input', function() {
+        const query = this.value.trim();
+        if (query.length < 2) {
+            bookResults.style.display = 'none';
+            return;
+        }
+
+        // Simulate API call - replace with actual API endpoint
+        simulateBookSearch(query).then(books => {
+            displayBookResults(books);
+        });
+    });
+
+    // Member search functionality
+    const memberSearch = document.getElementById('memberSearch');
+    const memberResults = document.getElementById('memberSearchResults');
+
+    memberSearch.addEventListener('input', function() {
+        const query = this.value.trim();
+        if (query.length < 2) {
+            memberResults.style.display = 'none';
+            return;
+        }
+
+        // Simulate API call - replace with actual API endpoint
+        simulateMemberSearch(query).then(members => {
+            displayMemberResults(members);
+        });
+    });
+
+    // Close search results when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!bookSearch.contains(e.target) && !bookResults.contains(e.target)) {
+            bookResults.style.display = 'none';
+        }
+        if (!memberSearch.contains(e.target) && !memberResults.contains(e.target)) {
+            memberResults.style.display = 'none';
+        }
+    });
+
+    // Update due date when issue date changes
+    document.getElementById('issue_date').addEventListener('change', function() {
+        const issueDate = new Date(this.value);
+        const dueDate = new Date(issueDate);
+        dueDate.setDate(dueDate.getDate() + 14);
+        document.getElementById('due_date').value = dueDate.toISOString().split('T')[0];
+        document.getElementById('due_date').min = this.value;
+    });
+
+    // Enable/disable issue button based on selection
+    function updateIssueButton() {
+        const bookId = document.getElementById('book_id').value;
+        const memberId = document.getElementById('member_id').value;
+        const issueBtn = document.getElementById('issueBtn');
+
+        if (bookId && memberId) {
+            issueBtn.disabled = false;
+            issueBtn.innerHTML = '<i class="bi bi-journal-check"></i> Issue Book';
+        } else {
+            issueBtn.disabled = true;
+            issueBtn.innerHTML = '<i class="bi bi-journal-x"></i> Select Book & Member';
+        }
+    }
+
+    // Form submission
+    const form = document.getElementById('issueBookForm');
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Validate selections
+        if (!document.getElementById('book_id').value || !document.getElementById('member_id').value) {
+            showAlert('Please select both a book and a member.', 'danger');
+            return;
+        }
+
+        // Show loading
+        const issueBtn = document.getElementById('issueBtn');
+        const originalText = issueBtn.innerHTML;
+        issueBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processing...';
+        issueBtn.disabled = true;
+
+        // Simulate API call
+        setTimeout(() => {
+            // In real implementation, this would be an actual form submission
+            showSuccessModal();
+            issueBtn.innerHTML = originalText;
+            issueBtn.disabled = false;
+        }, 1500);
+    });
+
+    // Helper functions
+    function simulateBookSearch(query) {
+        // Mock data - replace with actual API call
+        return new Promise(resolve => {
+            const mockBooks = [
+                {
+                    id: 'CS001',
+                    title: 'Introduction to Computer Science',
+                    author: 'John Smith',
+                    isbn: '978-0123456789',
+                    category: 'Computer Science',
+                    available: 3,
+                    total: 5
+                },
+                {
+                    id: 'CS002',
+                    title: 'Data Structures and Algorithms',
+                    author: 'Jane Doe',
+                    isbn: '978-0987654321',
+                    category: 'Computer Science',
+                    available: 1,
+                    total: 3
+                },
+                {
+                    id: 'ENG001',
+                    title: 'Advanced Engineering Mathematics',
+                    author: 'Robert Johnson',
+                    isbn: '978-1122334455',
+                    category: 'Engineering',
+                    available: 2,
+                    total: 4
+                }
+            ];
+
+            const filtered = mockBooks.filter(book =>
+                book.title.toLowerCase().includes(query.toLowerCase()) ||
+                book.author.toLowerCase().includes(query.toLowerCase()) ||
+                book.isbn.includes(query) ||
+                book.id.toLowerCase().includes(query.toLowerCase())
+            );
+
+            resolve(filtered);
+        });
+    }
+
+    function simulateMemberSearch(query) {
+        // Mock data - replace with actual API call
+        return new Promise(resolve => {
+            const mockMembers = [
+                {
+                    id: 'STU2024001',
+                    name: 'John Doe',
+                    regNo: 'KU/CS/001/2024',
+                    type: 'Student',
+                    status: 'Active',
+                    borrowed: 2,
+                    max: 5
+                },
+                {
+                    id: 'STU2024002',
+                    name: 'Jane Smith',
+                    regNo: 'KU/CS/002/2024',
+                    type: 'Student',
+                    status: 'Active',
+                    borrowed: 0,
+                    max: 5
+                },
+                {
+                    id: 'STAFF001',
+                    name: 'Dr. Robert Johnson',
+                    regNo: 'KU/STAFF/CS/001',
+                    type: 'Faculty',
+                    status: 'Active',
+                    borrowed: 3,
+                    max: 10
+                }
+            ];
+
+            const filtered = mockMembers.filter(member =>
+                member.name.toLowerCase().includes(query.toLowerCase()) ||
+                member.regNo.toLowerCase().includes(query.toLowerCase()) ||
+                member.id.toLowerCase().includes(query.toLowerCase())
+            );
+
+            resolve(filtered);
+        });
+    }
+
+    function displayBookResults(books) {
+        if (books.length === 0) {
+            bookResults.innerHTML = '<div class="search-item text-muted">No books found</div>';
+            bookResults.style.display = 'block';
+            return;
+        }
+
+        let html = '';
+        books.forEach(book => {
+            const availableClass = book.available > 0 ? 'text-success' : 'text-danger';
+            const availableText = book.available > 0 ? `${book.available} available` : 'Out of stock';
+
+            html += `
+                <div class="search-item" onclick="selectBook('${book.id}', '${book.title}', '${book.author}', '${book.isbn}', '${book.category}', ${book.available}, ${book.total})">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <strong>${book.title}</strong><br>
+                            <small class="text-muted">${book.author}</small>
+                        </div>
+                        <div class="text-end">
+                            <small class="${availableClass}">${availableText}</small><br>
+                            <small class="text-muted">ID: ${book.id}</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        bookResults.innerHTML = html;
+        bookResults.style.display = 'block';
+    }
+
+    function displayMemberResults(members) {
+        if (members.length === 0) {
+            memberResults.innerHTML = '<div class="search-item text-muted">No members found</div>';
+            memberResults.style.display = 'block';
+            return;
+        }
+
+        let html = '';
+        members.forEach(member => {
+            const statusClass = member.status === 'Active' ? 'text-success' : 'text-danger';
+            const typeClass = member.type === 'Student' ? 'bg-primary' : member.type === 'Faculty' ? 'bg-warning' : 'bg-info';
+
+            html += `
+                <div class="search-item" onclick="selectMember('${member.id}', '${member.name}', '${member.regNo}', '${member.type}', '${member.status}', ${member.borrowed}, ${member.max})">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <strong>${member.name}</strong><br>
+                            <small class="text-muted">${member.regNo}</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge ${typeClass}">${member.type}</span><br>
+                            <small class="${statusClass}">${member.borrowed}/${member.max} books</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        memberResults.innerHTML = html;
+        memberResults.style.display = 'block';
+    }
+
+    function showAlert(message, type) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+        const container = document.querySelector('.container.py-4');
+        container.insertBefore(alertDiv, container.firstChild);
+
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 5000);
+    }
+
+    function showSuccessModal() {
+        // Populate modal with selected data
+        document.getElementById('modalBookTitle').textContent = document.getElementById('bookTitle').textContent;
+        document.getElementById('modalBookAuthor').textContent = document.getElementById('bookAuthor').textContent;
+        document.getElementById('modalBookISBN').textContent = document.getElementById('bookISBN').textContent;
+        document.getElementById('modalBookID').textContent = document.getElementById('book_id').value;
+
+        document.getElementById('modalMemberName').textContent = document.getElementById('memberName').textContent;
+        document.getElementById('modalMemberRegNo').textContent = document.getElementById('memberRegNo').textContent;
+        document.getElementById('modalMemberID').textContent = document.getElementById('member_id').value;
+        document.getElementById('modalMemberType').textContent = document.getElementById('memberType').textContent;
+
+        document.getElementById('modalTransactionID').textContent = document.getElementById('transaction_id').value;
+        document.getElementById('modalIssueDate').textContent = document.getElementById('issue_date').value;
+        document.getElementById('modalDueDate').textContent = document.getElementById('due_date').value;
+
+        const modal = new bootstrap.Modal(document.getElementById('successModal'));
+        modal.show();
+    }
+
+    // Load recent transactions
+    loadRecentTransactions();
+});
+
+// Global functions accessible from onclick attributes
+function selectBook(id, title, author, isbn, category, available, total) {
+    document.getElementById('book_id').value = id;
+    document.getElementById('bookTitle').textContent = title;
+    document.getElementById('bookAuthor').textContent = `By ${author}`;
+    document.getElementById('bookISBN').textContent = isbn;
+    document.getElementById('bookCategory').textContent = category;
+    document.getElementById('bookAvailability').textContent = `Available: ${available}/${total}`;
+    document.getElementById('bookAvailability').className =
+        `badge availability-badge ${available > 0 ? 'bg-success' : 'bg-danger'}`;
+
+    document.getElementById('selectedBook').style.display = 'block';
+    document.getElementById('bookSearchResults').style.display = 'none';
+    document.getElementById('bookSearch').value = '';
+
+    updateIssueButton();
+
+    if (available === 0) {
+        showAlert('This book is currently out of stock!', 'warning');
+    }
+}
+
+function selectMember(id, name, regNo, type, status, borrowed, max) {
+    document.getElementById('member_id').value = id;
+    document.getElementById('memberName').textContent = name;
+    document.getElementById('memberRegNo').textContent = regNo;
+    document.getElementById('memberType').textContent = type;
+    document.getElementById('memberStatus').textContent = status;
+    document.getElementById('memberBorrowed').textContent = `Borrowed: ${borrowed}/${max}`;
+    document.getElementById('memberStatus').className =
+        `badge ${status === 'Active' ? 'bg-success' : 'bg-danger'}`;
+    document.getElementById('memberType').className =
+        `badge ${type === 'Student' ? 'bg-primary' : type === 'Faculty' ? 'bg-warning' : 'bg-info'}`;
+
+    document.getElementById('selectedMember').style.display = 'block';
+    document.getElementById('memberSearchResults').style.display = 'none';
+    document.getElementById('memberSearch').value = '';
+
+    updateIssueButton();
+
+    if (borrowed >= max) {
+        showAlert('Member has reached borrowing limit!', 'warning');
+    }
+    if (status !== 'Active') {
+        showAlert('Member account is not active!', 'danger');
+    }
+}
+
+function clearBookSelection() {
+    document.getElementById('book_id').value = '';
+    document.getElementById('selectedBook').style.display = 'none';
+    document.getElementById('bookSearch').value = '';
+    updateIssueButton();
+}
+
+function clearMemberSelection() {
+    document.getElementById('member_id').value = '';
+    document.getElementById('selectedMember').style.display = 'none';
+    document.getElementById('memberSearch').value = '';
+    updateIssueButton();
+}
+
+function loadRecentTransactions() {
+    // Mock data - replace with actual API call
+    const mockTransactions = [
+        {
+            id: 'TRX202401151430001',
+            book: 'Introduction to Computer Science',
+            member: 'John Doe',
+            issueDate: '2024-01-15',
+            dueDate: '2024-01-29',
+            status: 'Active'
+        },
+        {
+            id: 'TRX202401151430002',
+            book: 'Data Structures and Algorithms',
+            member: 'Jane Smith',
+            issueDate: '2024-01-14',
+            dueDate: '2024-01-28',
+            status: 'Active'
+        },
+        {
+            id: 'TRX202401151430003',
+            book: 'Advanced Engineering Mathematics',
+            member: 'Dr. Robert Johnson',
+            issueDate: '2024-01-13',
+            dueDate: '2024-01-27',
+            status: 'Active'
+        }
+    ];
+
+    const tbody = document.getElementById('recentTransactions');
+    if (mockTransactions.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center py-4">
+                    <i class="bi bi-journal text-muted" style="font-size: 2rem;"></i>
+                    <p class="text-muted mt-2">No recent transactions</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    let html = '';
+    mockTransactions.forEach(trans => {
+        const statusClass = trans.status === 'Active' ? 'status-issued' :
+                          trans.status === 'Overdue' ? 'status-overdue' : 'status-returned';
+
+        html += `
+            <tr>
+                <td><strong>${trans.id}</strong></td>
+                <td>${trans.book}</td>
+                <td>${trans.member}</td>
+                <td>${trans.issueDate}</td>
+                <td>${trans.dueDate}</td>
+                <td><span class="status-badge ${statusClass}">${trans.status}</span></td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = html;
+}
+
+function printReceipt() {
+    const printWindow = window.open('', '_blank');
+    const content = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Kirinyaga University Library - Receipt</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                .header { text-align: center; margin-bottom: 20px; }
+                .university { font-size: 24px; font-weight: bold; color: #1e7e34; }
+                .receipt-title { font-size: 18px; margin: 10px 0; }
+                .details { margin: 20px 0; }
+                .details table { width: 100%; border-collapse: collapse; }
+                .details th, .details td { padding: 8px; border: 1px solid #ddd; }
+                .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }
+                .stamp { border: 2px solid #000; padding: 10px; margin: 20px auto; width: 150px; text-align: center; }
+                .barcode { text-align: center; margin: 20px 0; font-family: monospace; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <div class="university">Kirinyaga University</div>
+                <div>School of Innovation and Technology</div>
+                <div class="receipt-title">LIBRARY BOOK ISSUE RECEIPT</div>
+            </div>
+
+            <div class="details">
+                <table>
+                    <tr>
+                        <th colspan="2" style="background-color: #f8f9fa;">Transaction Details</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Transaction ID:</strong></td>
+                        <td>${document.getElementById('transaction_id').value}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Date & Time:</strong></td>
+                        <td>${new Date().toLocaleString()}</td>
+                    </tr>
+                    <tr>
+                        <th colspan="2" style="background-color: #f8f9fa;">Book Details</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Book Title:</strong></td>
+                        <td>${document.getElementById('bookTitle').textContent}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Author:</strong></td>
+                        <td>${document.getElementById('bookAuthor').textContent}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Book ID:</strong></td>
+                        <td>${document.getElementById('book_id').value}</td>
+                    </tr>
+                    <tr>
+                        <th colspan="2" style="background-color: #f8f9fa;">Member Details</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Member Name:</strong></td>
+                        <td>${document.getElementById('memberName').textContent}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Registration No:</strong></td>
+                        <td>${document.getElementById('memberRegNo').textContent}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Member ID:</strong></td>
+                        <td>${document.getElementById('member_id').value}</td>
+                    </tr>
+                    <tr>
+                        <th colspan="2" style="background-color: #f8f9fa;">Issue Details</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Issue Date:</strong></td>
+                        <td>${document.getElementById('issue_date').value}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Due Date:</strong></td>
+                        <td>${document.getElementById('due_date').value}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Issued By:</strong></td>
+                        <td>Library Staff</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="barcode">
+                ${document.getElementById('transaction_id').value}<br>
+                █▀█▀█▀█▀█▀█▀█▀█▀█▀█
+            </div>
+
+            <div class="stamp">
+                ISSUED<br>
+                Kirinyaga University<br>
+                Library Stamp
+            </div>
+
+            <div class="footer">
+                <p><strong>Important Notice:</strong></p>
+                <p>1. Please return the book by the due date to avoid fines</p>
+                <p>2. Fine rate: KES 10 per day for overdue books</p>
+                <p>3. Keep this receipt for reference</p>
+                <p>4. Report lost books immediately</p>
+                <p>Library Hours: Mon-Fri 8:00 AM - 8:00 PM | Sat 9:00 AM - 5:00 PM</p>
+                <p>Email: library@kirinyaga.ac.ke | Phone: +254 723 123 456</p>
+            </div>
+
+            <script>
+                window.onload = function() {
+                    window.print();
+                    setTimeout(function() {
+                        window.close();
+                    }, 1000);
+                }
+            </script>
+        </body>
+        </html>
+    `;
+
+    printWindow.document.write(content);
+    printWindow.document.close();
+}
+
+// Simulate barcode scanning
+document.getElementById('scanBookBtn').addEventListener('click', function() {
+    // In real implementation, this would interface with a barcode scanner
+    showAlert('Barcode scanner activated. Please scan the book barcode.', 'info');
+    // For demo, simulate scanning after 2 seconds
+    setTimeout(() => {
+        document.getElementById('bookSearch').value = 'CS001';
+        document.getElementById('bookSearch').dispatchEvent(new Event('input'));
+    }, 2000);
+});
+
+document.getElementById('scanMemberBtn').addEventListener('click', function() {
+    // In real implementation, this would interface with a barcode scanner
+    showAlert('Barcode scanner activated. Please scan the member card.', 'info');
+    // For demo, simulate scanning after 2 seconds
+    setTimeout(() => {
+        document.getElementById('memberSearch').value = 'STU2024001';
+        document.getElementById('memberSearch').dispatchEvent(new Event('input'));
+    }, 2000);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Books Catalog - Kirinyaga University Library{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="text-success">
+                <i class="bi bi-book"></i> Books Catalog
+            </h2>
+            <a href="{{ url_for('add_book') }}" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Add New Book
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filter -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('books') }}">
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <input type="text" class="form-control" name="search"
+                           placeholder="Search by title, author, or ISBN..."
+                           value="{{ request.args.get('search', '') }}">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" name="category">
+                        <option value="">All Categories</option>
+                        {% for cat in categories %}
+                            {% if cat[0] %}
+                            <option value="{{ cat[0] }}"
+                                    {% if request.args.get('category') == cat[0] %}selected{% endif %}>
+                                {{ cat[0] }}
+                            </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Books Table -->
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Book ID</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>ISBN</th>
+                        <th>Category</th>
+                        <th>Copies</th>
+                        <th>Available</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for book in books %}
+                    <tr>
+                        <td><strong>{{ book.book_id }}</strong></td>
+                        <td>
+                            <strong>{{ book.title }}</strong><br>
+                            <small class="text-muted">{{ book.edition }}</small>
+                        </td>
+                        <td>{{ book.author }}</td>
+                        <td><code>{{ book.isbn }}</code></td>
+                        <td>
+                            <span class="badge bg-info">{{ book.category }}</span>
+                        </td>
+                        <td>{{ book.total_copies }}</td>
+                        <td>
+                            {% if book.available_copies > 0 %}
+                            <span class="badge bg-success">{{ book.available_copies }}</span>
+                            {% else %}
+                            <span class="badge bg-danger">0</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="#" class="btn btn-outline-primary" title="View Details">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ url_for('issue_book') }}?book_id={{ book.book_id }}"
+                                   class="btn btn-outline-success" title="Issue Book">
+                                    <i class="bi bi-journal-plus"></i>
+                                </a>
+                                <a href="#" class="btn btn-outline-warning" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            <i class="bi bi-book text-muted" style="font-size: 3rem;"></i>
+                            <h5 class="text-muted mt-2">No books found</h5>
+                            <p>Try a different search or add new books</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Summary -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    Showing <strong>{{ books|length }}</strong> books in catalog
+                </div>
+            </div>
+            <div class="col-md-6 text-end">
+                <button class="btn btn-outline-success">
+                    <i class="bi bi-download"></i> Export to CSV
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

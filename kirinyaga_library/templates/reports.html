@@ -1,0 +1,389 @@
+{% extends "base.html" %}
+
+{% block title %}Reports - Kirinyaga University Library{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chart-container {
+        height: 300px;
+        position: relative;
+    }
+    .report-card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .stat-number-large {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #1e7e34;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="text-success">
+            <i class="bi bi-bar-chart"></i> Library Reports & Analytics
+        </h2>
+        <p class="text-muted">Comprehensive library statistics and insights</p>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card report-card">
+            <div class="card-body text-center">
+                <div class="stat-number-large">{{ books_by_category|sum(attribute='count') }}</div>
+                <p class="text-muted">Books by Category</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card report-card">
+            <div class="card-body text-center">
+                <div class="stat-number-large">{{ monthly_issues|sum(attribute='count') }}</div>
+                <p class="text-muted">Monthly Issues</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card report-card">
+            <div class="card-body text-center">
+                <div class="stat-number-large">{{ overdue_books|length }}</div>
+                <p class="text-muted">Overdue Books</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card report-card">
+            <div class="card-body text-center">
+                <div class="stat-number-large">{{ top_members|length }}</div>
+                <p class="text-muted">Active Members</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts and Reports -->
+<div class="row">
+    <!-- Books by Category -->
+    <div class="col-md-6">
+        <div class="card report-card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Books by Category</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+                <div class="mt-3">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Count</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set total = books_by_category|sum(attribute='count') %}
+                            {% for category in books_by_category %}
+                            <tr>
+                                <td>{{ category[0] or 'Uncategorized' }}</td>
+                                <td>{{ category[1] }}</td>
+                                <td>
+                                    {% if total > 0 %}
+                                    {{ ((category[1] / total) * 100)|round(1) }}%
+                                    {% else %}
+                                    0%
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Issues -->
+    <div class="col-md-6">
+        <div class="card report-card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-graph-up"></i> Monthly Book Issues</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+                <div class="mt-3">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Month</th>
+                                <th>Issues</th>
+                                <th>Trend</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for month in monthly_issues %}
+                            <tr>
+                                <td>{{ month[0] }}</td>
+                                <td>{{ month[1] }}</td>
+                                <td>
+                                    {% if loop.index > 1 %}
+                                        {% set prev = monthly_issues[loop.index0 - 1][1] %}
+                                        {% set change = ((month[1] - prev) / prev * 100)|round(1) %}
+                                        {% if change > 0 %}
+                                        <span class="text-success">↑ {{ change }}%</span>
+                                        {% elif change < 0 %}
+                                        <span class="text-danger">↓ {{ change|abs }}%</span>
+                                        {% else %}
+                                        <span class="text-muted">→ 0%</span>
+                                        {% endif %}
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Overdue Books -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card report-card">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Overdue Books Report</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Transaction ID</th>
+                                <th>Book Title</th>
+                                <th>Member</th>
+                                <th>Due Date</th>
+                                <th>Days Overdue</th>
+                                <th>Fine Amount</th>
+                                <th>Contact</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in overdue_books %}
+                            <tr>
+                                <td>{{ transaction.transaction_id }}</td>
+                                <td>{{ transaction.book.title }}</td>
+                                <td>
+                                    {{ transaction.member.first_name }} {{ transaction.member.last_name }}<br>
+                                    <small>{{ transaction.member.email }}</small>
+                                </td>
+                                <td>{{ transaction.due_date.strftime('%Y-%m-%d') }}</td>
+                                <td>
+                                    {% set days = (now - transaction.due_date).days %}
+                                    <span class="badge bg-danger">{{ days }} days</span>
+                                </td>
+                                <td>
+                                    {% set fine = days * 10 %}
+                                    <strong>KES {{ fine }}</strong>
+                                </td>
+                                <td>
+                                    <a href="mailto:{{ transaction.member.email }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-envelope"></i> Email
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center py-4">
+                                    <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+                                    <h5 class="text-success mt-2">No overdue books!</h5>
+                                    <p>All books have been returned on time.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Top Members -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card report-card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-trophy"></i> Top Active Members</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Member Name</th>
+                                <th>Registration No.</th>
+                                <th>Department</th>
+                                <th>Books Borrowed</th>
+                                <th>Member Since</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for member, count in top_members %}
+                            <tr>
+                                <td>
+                                    {% if loop.index == 1 %}
+                                    <span class="badge bg-warning text-dark">🥇</span>
+                                    {% elif loop.index == 2 %}
+                                    <span class="badge bg-secondary">🥈</span>
+                                    {% elif loop.index == 3 %}
+                                    <span class="badge bg-danger">🥉</span>
+                                    {% else %}
+                                    <span class="badge bg-light text-dark">#{{ loop.index }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong>{{ member.first_name }} {{ member.last_name }}</strong><br>
+                                    <small>{{ member.email }}</small>
+                                </td>
+                                <td><code>{{ member.registration_number }}</code></td>
+                                <td>{{ member.department }}</td>
+                                <td>
+                                    <span class="badge bg-success">{{ count }}</span>
+                                </td>
+                                <td>{{ member.join_date.strftime('%Y-%m-%d') }}</td>
+                                <td>
+                                    {% if member.status == 'active' %}
+                                    <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">{{ member.status|title }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Report Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="mb-3">Generate Detailed Reports</h5>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-success">
+                        <i class="bi bi-file-pdf"></i> Export PDF
+                    </button>
+                    <button type="button" class="btn btn-outline-success">
+                        <i class="bi bi-file-excel"></i> Export Excel
+                    </button>
+                    <button type="button" class="btn btn-outline-success">
+                        <i class="bi bi-printer"></i> Print Report
+                    </button>
+                    <button type="button" class="btn btn-outline-success" onclick="window.location.reload()">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Books by Category Chart
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    const categoryChart = new Chart(categoryCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [
+                {% for category in books_by_category %}
+                '{{ category[0] or "Uncategorized" }}',
+                {% endfor %}
+            ],
+            datasets: [{
+                data: [
+                    {% for category in books_by_category %}
+                    {{ category[1] }},
+                    {% endfor %}
+                ],
+                backgroundColor: [
+                    '#1e7e34', '#28a745', '#20c997', '#17a2b8',
+                    '#007bff', '#6c757d', '#ffc107', '#fd7e14',
+                    '#e83e8c', '#6f42c1'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+
+    // Monthly Issues Chart
+    const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+    const monthlyChart = new Chart(monthlyCtx, {
+        type: 'line',
+        data: {
+            labels: [
+                {% for month in monthly_issues %}
+                '{{ month[0] }}',
+                {% endfor %}
+            ],
+            datasets: [{
+                label: 'Books Issued',
+                data: [
+                    {% for month in monthly_issues %}
+                    {{ month[1] }},
+                    {% endfor %}
+                ],
+                borderColor: '#1e7e34',
+                backgroundColor: 'rgba(30, 126, 52, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
